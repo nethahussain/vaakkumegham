@@ -1,4 +1,4 @@
-[README.md](https://github.com/user-attachments/files/25457250/README.md)
+
 # വാക്ക്‌മേഘം — Malayalam Word Cloud Studio
 
 A browser-based word cloud generator built specifically for Malayalam (മലയാളം). Paste any Malayalam text and instantly generate beautiful, customizable word clouds with live preview.
