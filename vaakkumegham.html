@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="ml">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>വാക്ക്‌മേഘം — Malayalam Word Cloud Studio</title>
+<meta name="description" content="Malayalam Word Cloud Generator with live preview, multiple shapes, fonts, and export options.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manjari:wght@100;400;700&family=Noto+Sans+Malayalam:wght@100..900&family=Gayathri:wght@100;400;700&family=Chilanka&family=Noto+Serif+Malayalam:wght@100..900&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=Anjali+Old+Lipi&display=swap" rel="stylesheet">
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body, #root { height: 100%; width: 100%; overflow: hidden; }
+  body { background: #FFFFFF; }
+  @keyframes ftPulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  input[type=range] { -webkit-appearance: none; background: #E6D9CE; border-radius: 2px; outline: none; height: 3px; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: #0D7680; cursor: pointer; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+  input[type=range]::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: #0D7680; cursor: pointer; border: 2px solid #fff; }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #CCC1B7; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #A39B93; }
+  textarea::-webkit-scrollbar { width: 5px; }
+  svg text { user-select: none; }
+  ::selection { background: #0D768033; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" data-type="module">
+const { useState, useRef, useEffect, useMemo } = React;
+
+const DEFAULT_TEXT = `കേരളം കേരളം കേരളം കേരളം കേരളം കേരളം കേരളം കേരളം കേരളം കേരളം കേരളം കേരളം
+മലയാളം മലയാളം മലയാളം മലയാളം മലയാളം മലയാളം മലയാളം മലയാളം മലയാളം മലയാളം
+ഓണം ഓണം ഓണം ഓണം ഓണം ഓണം ഓണം ഓണം
+കഥകളി കഥകളി കഥകളി കഥകളി കഥകളി കഥകളി കഥകളി
+പ്രകൃതി പ്രകൃതി പ്രകൃതി പ്രകൃതി പ്രകൃതി പ്രകൃതി പ്രകൃതി
+സംസ്കാരം സംസ്കാരം സംസ്കാരം സംസ്കാരം സംസ്കാരം സംസ്കാരം
+മഴ മഴ മഴ മഴ മഴ മഴ
+ആയുർവേദം ആയുർവേദം ആയുർവേദം ആയുർവേദം ആയുർവേദം
+തെയ്യം തെയ്യം തെയ്യം തെയ്യം തെയ്യം
+സാഹിത്യം സാഹിത്യം സാഹിത്യം സാഹിത്യം സാഹിത്യം
+ക്ഷേത്രം ക്ഷേത്രം ക്ഷേത്രം ക്ഷേത്രം
+വിദ്യാഭ്യാസം വിദ്യാഭ്യാസം വിദ്യാഭ്യാസം വിദ്യാഭ്യാസം
+തൃശ്ശൂർ തൃശ്ശൂർ തൃശ്ശൂർ തൃശ്ശൂർ
+കൊച്ചി കൊച്ചി കൊച്ചി കൊച്ചി
+മോഹിനിയാട്ടം മോഹിനിയാട്ടം മോഹിനിയാട്ടം മോഹിനിയാട്ടം
+ശാസ്ത്രം ശാസ്ത്രം ശാസ്ത്രം ശാസ്ത്രം
+പുഴ പുഴ പുഴ
+കായൽ കായൽ കായൽ
+വള്ളംകളി വള്ളംകളി വള്ളംകളി
+ചെണ്ട ചെണ്ട ചെണ്ട
+പൂരം പൂരം പൂരം
+വയനാട് വയനാട് വയനാട്
+മൂന്നാർ മൂന്നാർ മൂന്നാർ
+ഹൗസ്ബോട്ട് ഹൗസ്ബോട്ട് ഹൗസ്ബോട്ട്
+തെങ്ങ് തെങ്ങ് തെങ്ങ്
+ആന ആന ആന
+കോഴിക്കോട് കോഴിക്കോട് കോഴിക്കോട്
+തിരുവനന്തപുരം തിരുവനന്തപുരം തിരുവനന്തപുരം
+നെൽപ്പാടം നെൽപ്പാടം നെൽപ്പാടം
+കളരിപ്പയറ്റ് കളരിപ്പയറ്റ്
+വിഷു വിഷു
+ആലപ്പുഴ ആലപ്പുഴ
+കോട്ടയം കോട്ടയം
+പാലക്കാട് പാലക്കാട്
+കണ്ണൂർ കണ്ണൂർ
+മലപ്പുറം മലപ്പുറം
+പഞ്ചവാദ്യം പഞ്ചവാദ്യം
+ചോറ് ചോറ്
+മീൻ മീൻ
+തേങ്ങ തേങ്ങ
+ചക്ക ചക്ക
+കുരുമുളക് കുരുമുളക്
+ഏലം ഏലം
+കാട് കാട്
+വെളിച്ചെണ്ണ വെളിച്ചെണ്ണ
+പെരിയാർ പെരിയാർ
+മാങ്ങ കപ്പ ഇഞ്ചി മഞ്ഞൾ കറുവ ഇടുക്കി തേക്കടി കുമരകം വർക്കല
+പത്തനംതിട്ട എറണാകുളം കാസർഗോഡ് മസ്ജിദ് പള്ളി മുല്ല ജാതി ചെമ്പരത്തി
+പപ്പായ വാഴ കമുക് മാവ് പ്ലാവ് ഉത്സവം കൈതപ്പൂവ്`;
+
+const STOP_WORDS_ML = new Set([
+  "ആണ്","ഉണ്ട്","എന്ന","ഒരു","ഈ","കൂടി","മറ്റ്","വളരെ",
+  "അത്","ഇത്","ആ","ഇ","ഉം","ഇൽ","ന്റെ","ക്ക്","യുടെ",
+  "ആയ","ആയി","എന്ന്","അല്ല","വരെ","മാത്രം","തന്നെ","കൊണ്ട്",
+  "the","and","is","in","to","of","a","for","with","on","it","as","are"
+]);
+
+const FONTS = [
+  { name: "Manjari", value: "'Manjari', sans-serif" },
+  { name: "Noto Sans Malayalam", value: "'Noto Sans Malayalam', sans-serif" },
+  { name: "Gayathri", value: "'Gayathri', sans-serif" },
+  { name: "Chilanka", value: "'Chilanka', cursive" },
+  { name: "Noto Serif Malayalam", value: "'Noto Serif Malayalam', serif" },
+  { name: "Anjali Old Lipi", value: "'Anjali Old Lipi', serif" },
+];
+
+const PALETTES = [
+  { name: "ക്ലാസിക്", colors: ["#262A33","#0D7680","#990F3D","#0F5499","#593D1B","#0A3A4A"] },
+  { name: "കേരളം", colors: ["#1B5E20","#FF6F00","#D32F2F","#1565C0","#6A1B9A","#00695C"] },
+  { name: "സൂര്യൻ", colors: ["#FF6F00","#F57F17","#E65100","#BF360C","#FF8F00","#FFB300"] },
+  { name: "കടൽ", colors: ["#006064","#00838F","#0097A7","#00ACC1","#0277BD","#01579B"] },
+  { name: "മഴവില്ല്", colors: ["#D32F2F","#F57C00","#FBC02D","#388E3C","#1976D2","#7B1FA2"] },
+  { name: "പ്രകൃതി", colors: ["#1B5E20","#2E7D32","#388E3C","#43A047","#66BB6A","#004D40"] },
+  { name: "രാത്രി", colors: ["#1A1A2E","#16213E","#0F3460","#533483","#2C394B","#334756"] },
+  { name: "വസന്തം", colors: ["#EC407A","#AB47BC","#7E57C2","#42A5F5","#26C6DA","#66BB6A"] },
+  { name: "മണ്ണ്", colors: ["#4E342E","#5D4037","#6D4C41","#795548","#8D6E63","#A1887F"] },
+  { name: "നിയോൺ", colors: ["#FF1744","#F50057","#D500F9","#651FFF","#00E5FF","#76FF03"] },
+];
+
+const SHAPES = [
+  { name: "ചതുരം", value: "rectangle", icon: "▬" },
+  { name: "വൃത്തം", value: "circle", icon: "●" },
+  { name: "ഹൃദയം", value: "heart", icon: "♥" },
+  { name: "നക്ഷത്രം", value: "star", icon: "★" },
+  { name: "വജ്രം", value: "diamond", icon: "◆" },
+  { name: "ത്രികോണം", value: "triangle", icon: "▲" },
+  { name: "മേഘം", value: "cloud", icon: "☁" },
+];
+
+/* ---- engine ---- */
+function isInsideShape(x, y, w, h, shape) {
+  const nx = (x / w) * 2 - 1;  // -1 to 1
+  const ny = (y / h) * 2 - 1;  // -1 to 1
+  const r = Math.sqrt(nx * nx + ny * ny);
+  switch(shape){
+    case "circle": return r <= 0.92;
+    case "heart": {
+      // Flip y so heart points down, shift up
+      const hx = nx * 1.1;
+      const hy = -(ny - 0.3) * 1.1;
+      // Classic heart curve: (x^2 + y^2 - 1)^3 - x^2*y^3 < 0
+      const x2 = hx * hx, y2 = hy * hy;
+      return Math.pow(x2 + y2 - 0.8, 3) - x2 * y2 * hy < 0;
+    }
+    case "star": {
+      const angle = Math.atan2(ny, nx);
+      const points = 5;
+      const sector = Math.PI / points;
+      // angle within each sector
+      const a = ((angle % (2 * sector)) + 2 * sector) % (2 * sector);
+      const mid = sector;
+      // interpolate between outer (at tips) and inner (at valleys)
+      const outerR = 0.92, innerR = 0.36;
+      const t = Math.abs(a - mid) / mid; // 0 at tip, 1 at valley
+      const edgeR = outerR - t * (outerR - innerR);
+      return r <= edgeR;
+    }
+    case "diamond": return Math.abs(nx) * 0.85 + Math.abs(ny) * 0.85 <= 0.88;
+    case "triangle": {
+      // Equilateral triangle pointing up
+      const tx = nx, ty = ny + 0.25; // shift down a bit
+      if (ty > 0.75 || ty < -0.75) return false;
+      const halfW = 0.9 * (0.75 - ty) / 1.5;
+      return Math.abs(tx) <= halfW;
+    }
+    case "cloud": {
+      const circles = [
+        { cx: 0, cy: 0.05, r: 0.48 },
+        { cx: -0.35, cy: 0.25, r: 0.35 },
+        { cx: 0.35, cy: 0.25, r: 0.35 },
+        { cx: -0.15, cy: -0.2, r: 0.38 },
+        { cx: 0.2, cy: -0.25, r: 0.4 },
+        { cx: -0.45, cy: 0.0, r: 0.28 },
+        { cx: 0.48, cy: -0.05, r: 0.3 },
+      ];
+      return circles.some(c => Math.sqrt(Math.pow(nx - c.cx, 2) + Math.pow(ny - c.cy, 2)) <= c.r);
+    }
+    default: return Math.abs(nx) <= 0.95 && Math.abs(ny) <= 0.95;
+  }
+}
+
+function processText(text, filterStop, minFreq) {
+  const words = text.replace(/[.,!?;:"\u201C\u201D\u201E\u2018\u2019'()\[\]{}|/\\<>@#$%^&*~`+=_\-\u2013\u2014\u2026\d]/g," ").split(/\s+/).filter(w=>w.length>0);
+  const freq={};
+  words.forEach(w=>{ if(filterStop&&STOP_WORDS_ML.has(w))return; if(w.length<2)return; freq[w]=(freq[w]||0)+1; });
+  return Object.entries(freq).filter(([,c])=>c>=minFreq).sort((a,b)=>b[1]-a[1]);
+}
+
+function generateCloud(p) {
+  const {words,canvasW:W,canvasH:H,fontFamily,fontWeight,minSize,maxSize,shape,rotationMode,rotationAngle,spacing,palette,spiralTightness,maxWords}=p;
+  if(!words.length)return[];
+  const lim=words.slice(0,maxWords), mxF=lim[0][1], mnF=lim[lim.length-1][1], rng=mxF-mnF||1;
+  const placed=[], gW=Math.ceil(W/4), gH=Math.ceil(H/4), grid=new Uint8Array(gW*gH);
+  function chk(x,y,w,h){const x1=Math.floor(x/4),y1=Math.floor(y/4),x2=Math.ceil((x+w)/4),y2=Math.ceil((y+h)/4);if(x1<0||y1<0||x2>=gW||y2>=gH)return true;for(let gy=y1;gy<=y2;gy++)for(let gx=x1;gx<=x2;gx++)if(grid[gy*gW+gx])return true;return false;}
+  function mrk(x,y,w,h){const x1=Math.floor(x/4),y1=Math.floor(y/4),x2=Math.ceil((x+w)/4),y2=Math.ceil((y+h)/4);for(let gy=y1;gy<=y2;gy++)for(let gx=x1;gx<=x2;gx++)if(gy>=0&&gx>=0&&gx<gW&&gy<gH)grid[gy*gW+gx]=1;}
+  const ctx=document.createElement("canvas").getContext("2d");
+  for(let i=0;i<lim.length;i++){
+    const[word,freq]=lim[i], t=(freq-mnF)/rng, fs=minSize+t*(maxSize-minSize), col=palette[i%palette.length];
+    let rot=0;
+    if(rotationMode==="mixed")rot=Math.random()>0.5?0:-90;
+    else if(rotationMode==="random")rot=(Math.random()-0.5)*2*rotationAngle;
+    else if(rotationMode==="angled")rot=rotationAngle;
+    else if(rotationMode==="allAngles")rot=[-90,-45,0,45,90][Math.floor(Math.random()*5)];
+    const rad=rot*Math.PI/180; ctx.font=fontWeight+" "+fs+"px "+fontFamily;
+    const tw=ctx.measureText(word).width+spacing, th=fs*1.3+spacing;
+    const bw=Math.abs(tw*Math.cos(rad))+Math.abs(th*Math.sin(rad)), bh=Math.abs(tw*Math.sin(rad))+Math.abs(th*Math.cos(rad));
+    let ok=false;
+    for(let s=0;s<4500;s++){const a=s*0.12,r2=spiralTightness*0.8*a,px=W/2+r2*Math.cos(a)-bw/2,py=H/2+r2*Math.sin(a)-bh/2;if(!isInsideShape(px+bw/2,py+bh/2,W,H,shape))continue;if(!chk(px,py,bw,bh)){mrk(px,py,bw,bh);placed.push({word,freq,fontSize:fs,color:col,x:px+bw/2,y:py+bh/2,rotation:rot});ok=true;break;}}
+    if(!ok&&placed.length>30)break;
+  }
+  return placed;
+}
+
+function renderToCanvas(canvas,items,p){
+  const ctx=canvas.getContext("2d");
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  if(p.bgGradient!=="none"){let g;if(p.bgGradient==="linear")g=ctx.createLinearGradient(0,0,canvas.width,canvas.height);else if(p.bgGradient==="radial")g=ctx.createRadialGradient(canvas.width/2,canvas.height/2,0,canvas.width/2,canvas.height/2,Math.max(canvas.width,canvas.height)/2);else g=ctx.createLinearGradient(0,0,0,canvas.height);g.addColorStop(0,p.bgColor);g.addColorStop(1,p.bgGradientColor2);ctx.fillStyle=g;}else ctx.fillStyle=p.bgColor;
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  items.forEach(it=>{ctx.save();ctx.translate(it.x,it.y);ctx.rotate(it.rotation*Math.PI/180);ctx.font=p.fontWeight+" "+it.fontSize+"px "+p.fontFamily;ctx.fillStyle=it.color;ctx.globalAlpha=p.opacity;ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(it.word,0,0);ctx.restore();});
+}
+
+function useDebounce(v,d){const[s,set]=useState(v);useEffect(()=>{const t=setTimeout(()=>set(v),d);return()=>clearTimeout(t);},[v,d]);return s;}
+
+/* ---- FT-styled UI components ---- */
+const FT = {
+  cream: "#FFFFFF", paper: "#FAFAFA", sand: "#F2DFCE", warmGrey: "#A39B93",
+  ink: "#33302E", teal: "#0D7680", crimson: "#990F3D", oxford: "#0F5499",
+  wheat: "#EBD9C8", claret: "#660A27", border: "#CCC1B7", lightBorder: "#E6D9CE",
+};
+
+const Section = ({title, children, defaultOpen=true}) => {
+  const [open,setOpen]=useState(defaultOpen);
+  return (
+    <div style={{marginBottom:1, borderBottom:"1px solid "+FT.lightBorder}}>
+      <button onClick={()=>setOpen(!open)} style={{
+        width:"100%",padding:"11px 16px",display:"flex",justifyContent:"space-between",alignItems:"center",
+        background:"transparent",border:"none",color:FT.ink,cursor:"pointer",fontSize:12,fontWeight:600,
+        fontFamily:"'Source Serif 4','Georgia',serif",letterSpacing:"0.02em",textTransform:"uppercase"
+      }}>
+        <span>{title}</span>
+        <span style={{fontSize:10,opacity:0.4,transform:open?"rotate(180deg)":"none",transition:"transform 0.2s"}}>▾</span>
+      </button>
+      {open&&<div style={{padding:"0 16px 14px"}}>{children}</div>}
+    </div>
+  );
+};
+
+const Slider = ({label,value,onChange,min,max,step,suffix})=>(
+  <div style={{marginBottom:12}}>
+    <div style={{display:"flex",justifyContent:"space-between",marginBottom:5,fontSize:11,color:FT.warmGrey}}>
+      <span>{label}</span><span style={{color:FT.teal,fontWeight:600,fontFamily:"'Source Serif 4',Georgia,serif"}}>{(step||1)<1?value.toFixed(2):value}{suffix||""}</span>
+    </div>
+    <input type="range" min={min} max={max} step={step||1} value={value} onChange={e=>onChange(Number(e.target.value))} style={{width:"100%"}} />
+  </div>
+);
+
+const Chip = ({label,active,onClick,icon})=>(
+  <button onClick={onClick} style={{
+    padding:"5px 11px",borderRadius:3,fontSize:11,cursor:"pointer",fontWeight:active?600:400,
+    fontFamily:"'Manjari',sans-serif",
+    border:active?"1px solid "+FT.teal:"1px solid "+FT.lightBorder,
+    background:active?FT.teal+"12":"transparent",
+    color:active?FT.teal:FT.warmGrey,display:"flex",alignItems:"center",gap:4,transition:"all .15s"
+  }}>{icon&&<span style={{fontSize:12}}>{icon}</span>}{label}</button>
+);
+
+const tbBtn = {
+  background:"#fff",border:"1px solid "+FT.lightBorder,
+  color:FT.ink,borderRadius:3,width:28,height:28,cursor:"pointer",fontSize:13,
+  display:"flex",alignItems:"center",justifyContent:"center",padding:0,fontFamily:"inherit"
+};
+
+function expBtn(color){
+  return {
+    padding:"13px 16px",borderRadius:4,border:"1px solid "+FT.lightBorder,
+    background:"#fff",color:FT.ink,cursor:"pointer",fontSize:12,fontFamily:"inherit",
+    display:"flex",alignItems:"center",gap:12,textAlign:"left",transition:"all .2s",
+    boxShadow:"0 1px 3px rgba(0,0,0,0.04)"
+  };
+}
+
+/* ====================================================================== */
+function App(){
+  const [text,setText]=useState(DEFAULT_TEXT);
+  const [maxWords,setMaxWords]=useState(120);
+  const [minFreq,setMinFreq]=useState(1);
+  const [filterStop,setFilterStop]=useState(true);
+  const [fontIdx,setFontIdx]=useState(0);
+  const [fontWeight,setFontWeight]=useState("700");
+  const [minSize,setMinSize]=useState(14);
+  const [maxSize,setMaxSize]=useState(72);
+  const [paletteIdx,setPaletteIdx]=useState(0);
+  const [customColors,setCustomColors]=useState([]);
+  const [useCustom,setUseCustom]=useState(false);
+  const [bgColor,setBgColor]=useState("#FFFFFF");
+  const [bgGradient,setBgGradient]=useState("none");
+  const [bgGradientColor2,setBgGradientColor2]=useState("#F0F0F0");
+  const [shapeIdx,setShapeIdx]=useState(0);
+  const [rotationMode,setRotationMode]=useState("none");
+  const [rotationAngle,setRotationAngle]=useState(45);
+  const [spacing,setSpacing]=useState(0);
+  const [spiralTightness,setSpiralTightness]=useState(1);
+  const [opacity,setOpacity]=useState(1);
+  const [canvasSize,setCanvasSize]=useState("800x600");
+  const [items,setItems]=useState([]);
+  const [generating,setGenerating]=useState(false);
+  const [tab,setTab]=useState("text");
+  const [zoom,setZoom]=useState(1);
+  const [fullscreen,setFullscreen]=useState(false);
+  const [hoveredWord,setHoveredWord]=useState(null);
+  const [seed,setSeed]=useState(0);
+  const [showGrid,setShowGrid]=useState(false);
+
+  const hiddenCanvasRef=useRef(null);
+  const previewContainerRef=useRef(null);
+
+  const cw=parseInt(canvasSize.split("x")[0],10), ch=parseInt(canvasSize.split("x")[1],10);
+  const activePalette=useCustom&&customColors.length?customColors:PALETTES[paletteIdx].colors;
+
+  const layoutFP=useDebounce(JSON.stringify({text,filterStop,minFreq,cw,ch,fontIdx,fontWeight,minSize,maxSize,shapeIdx,rotationMode,rotationAngle,spacing,spiralTightness,maxWords,pal:activePalette,seed}),400);
+
+  useEffect(()=>{
+    setGenerating(true);
+    const id=setTimeout(()=>{
+      const w=processText(text,filterStop,minFreq);
+      const r=generateCloud({words:w,canvasW:cw,canvasH:ch,fontFamily:FONTS[fontIdx].value,fontWeight,minSize,maxSize,shape:SHAPES[shapeIdx].value,rotationMode,rotationAngle,spacing,palette:activePalette,spiralTightness,maxWords});
+      setItems(r);setGenerating(false);
+    },60);
+    return()=>clearTimeout(id);
+  },[layoutFP]);
+
+  useEffect(()=>{
+    if(!items.length)return;const c=hiddenCanvasRef.current;if(!c)return;c.width=cw;c.height=ch;
+    renderToCanvas(c,items,{bgColor,bgGradient,bgGradientColor2,fontFamily:FONTS[fontIdx].value,fontWeight,opacity});
+  },[items,bgColor,bgGradient,bgGradientColor2,fontIdx,fontWeight,opacity,cw,ch]);
+
+  useEffect(()=>{
+    const fit=()=>{if(!previewContainerRef.current)return;const el=previewContainerRef.current;setZoom(Math.min((el.clientWidth-48)/cw,(el.clientHeight-48)/ch,1));};
+    fit();window.addEventListener("resize",fit);return()=>window.removeEventListener("resize",fit);
+  },[cw,ch,fullscreen]);
+
+  const downloadPNG=()=>{const c=hiddenCanvasRef.current;if(!c)return;const a=document.createElement("a");a.download="wordcloud_malayalam.png";a.href=c.toDataURL("image/png");a.click();};
+  const downloadSVG=()=>{
+    let s='<svg xmlns="http://www.w3.org/2000/svg" width="'+cw+'" height="'+ch+'" viewBox="0 0 '+cw+' '+ch+'">';
+    s+='<rect width="'+cw+'" height="'+ch+'" fill="'+bgColor+'"/>';
+    items.forEach(it=>{s+='<text x="'+it.x+'" y="'+it.y+'" font-family="'+FONTS[fontIdx].value+'" font-size="'+it.fontSize+'" font-weight="'+fontWeight+'" fill="'+it.color+'" text-anchor="middle" dominant-baseline="central" transform="rotate('+it.rotation+','+it.x+','+it.y+')" opacity="'+opacity+'">'+it.word+'</text>';});
+    s+='</svg>';const b=new Blob([s],{type:"image/svg+xml"});const a=document.createElement("a");a.download="wordcloud_malayalam.svg";a.href=URL.createObjectURL(b);a.click();
+  };
+
+  const wordCount=useMemo(()=>processText(text,filterStop,minFreq).length,[text,filterStop,minFreq]);
+  const wordList=useMemo(()=>processText(text,filterStop,minFreq),[text,filterStop,minFreq]);
+  const fitZoom=()=>{if(!previewContainerRef.current)return;const el=previewContainerRef.current;setZoom(Math.min((el.clientWidth-48)/cw,(el.clientHeight-48)/ch,1));};
+
+  const tabsDef=[
+    {id:"text",label:"ടെക്സ്റ്റ്"},
+    {id:"layout",label:"ലേഔട്ട്"},
+    {id:"style",label:"രൂപം"},
+    {id:"export",label:"എക്സ്പോർട്ട്"},
+  ];
+
+  const gradId="bgG";
+  const previewSVG=useMemo(()=>(
+    <svg viewBox={"0 0 "+cw+" "+ch} width={cw*zoom} height={ch*zoom}
+      style={{borderRadius:2,display:"block",transition:"width .2s, height .2s"}} xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        {bgGradient==="linear"&&<linearGradient id={gradId} x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor={bgColor}/><stop offset="100%" stopColor={bgGradientColor2}/></linearGradient>}
+        {bgGradient==="radial"&&<radialGradient id={gradId} cx="50%" cy="50%" r="60%"><stop offset="0%" stopColor={bgColor}/><stop offset="100%" stopColor={bgGradientColor2}/></radialGradient>}
+        {bgGradient==="vertical"&&<linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={bgColor}/><stop offset="100%" stopColor={bgGradientColor2}/></linearGradient>}
+        {showGrid&&<pattern id="pG" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(0,0,0,0.06)" strokeWidth="0.5"/></pattern>}
+      </defs>
+      <rect width={cw} height={ch} fill={bgGradient!=="none"?"url(#"+gradId+")":bgColor}/>
+      {showGrid&&<rect width={cw} height={ch} fill="url(#pG)"/>}
+      {items.map((it,i)=>(
+        <text key={i} x={it.x} y={it.y} fontFamily={FONTS[fontIdx].value} fontSize={it.fontSize}
+          fontWeight={fontWeight} fill={hoveredWord===i?FT.crimson:it.color} textAnchor="middle"
+          dominantBaseline="central" transform={"rotate("+it.rotation+","+it.x+","+it.y+")"}
+          opacity={hoveredWord===i?1:opacity}
+          style={{transition:"fill .15s",cursor:"default"}}
+          onMouseEnter={()=>setHoveredWord(i)} onMouseLeave={()=>setHoveredWord(null)}>
+          {it.word}
+        </text>
+      ))}
+    </svg>
+  ),[items,cw,ch,zoom,bgColor,bgGradient,bgGradientColor2,fontIdx,fontWeight,opacity,hoveredWord,showGrid]);
+
+  const tip=hoveredWord!==null&&items[hoveredWord]?items[hoveredWord]:null;
+
+  return (
+    <div style={{height:"100vh",display:"flex",flexDirection:"column",background:FT.cream,color:FT.ink,fontFamily:"'Manjari','Noto Sans Malayalam',sans-serif"}}>
+
+      {/* ===== HEADER ===== */}
+      <div style={{padding:"0 24px",background:"#262A33",display:"flex",alignItems:"center",gap:16,flexShrink:0,height:52}}>
+        <div style={{display:"flex",alignItems:"baseline",gap:10}}>
+          <h1 style={{margin:0,fontSize:20,fontWeight:700,color:"#FFF1E5",fontFamily:"'Playfair Display',Georgia,serif",letterSpacing:"-0.02em"}}>
+            വാക്ക്‌മേഘം
+          </h1>
+          <span style={{fontSize:10,color:"#9E9891",fontFamily:"'Source Serif 4',Georgia,serif",letterSpacing:"0.15em",textTransform:"uppercase"}}>Word Cloud Studio</span>
+        </div>
+        <div style={{flex:1}}/>
+        <button onClick={()=>setSeed(s=>s+1)} style={{
+          padding:"7px 20px",borderRadius:3,border:"none",cursor:"pointer",fontFamily:"inherit",
+          background:FT.teal,color:"#fff",fontWeight:600,fontSize:12,
+          letterSpacing:"0.03em"
+        }}>⟳ പുതിയ ഡിസൈൻ</button>
+      </div>
+
+      {/* ===== THIN RULE ===== */}
+      <div style={{height:3,background:"linear-gradient(90deg,"+FT.teal+","+FT.crimson+","+FT.oxford+")",flexShrink:0}}/>
+
+      <div style={{flex:1,display:"flex",overflow:"hidden"}}>
+
+        {/* ===== SIDEBAR ===== */}
+        <div style={{width:310,minWidth:310,background:FT.paper,borderRight:"1px solid "+FT.lightBorder,display:"flex",flexDirection:"column",overflow:"hidden"}}>
+          {/* tabs */}
+          <div style={{display:"flex",borderBottom:"1px solid "+FT.lightBorder,flexShrink:0}}>
+            {tabsDef.map(t=>(
+              <button key={t.id} onClick={()=>setTab(t.id)} style={{
+                flex:1,padding:"10px 4px",border:"none",cursor:"pointer",fontSize:11,fontWeight:600,
+                fontFamily:"'Source Serif 4',Georgia,serif",letterSpacing:"0.03em",
+                background:tab===t.id?"#fff":"transparent",
+                color:tab===t.id?FT.teal:FT.warmGrey,
+                borderBottom:tab===t.id?"2px solid "+FT.teal:"2px solid transparent"
+              }}>{t.label}</button>
+            ))}
+          </div>
+
+          <div style={{flex:1,overflow:"auto",paddingTop:4}}>
+
+            {/* ---- TEXT ---- */}
+            {tab==="text"&&(<>
+              <Section title="ഉള്ളടക്കം">
+                <textarea value={text} onChange={e=>setText(e.target.value)} placeholder="മലയാളം ടെക്സ്റ്റ് ഇവിടെ ടൈപ്പ് ചെയ്യുക..."
+                  style={{width:"100%",height:170,background:"#fff",border:"1px solid "+FT.lightBorder,borderRadius:3,color:FT.ink,padding:10,fontSize:13,resize:"vertical",fontFamily:"'Manjari',sans-serif",lineHeight:1.8,outline:"none",boxSizing:"border-box"}}/>
+                <div style={{fontSize:11,color:FT.warmGrey,marginTop:5}}>{wordCount} തനതു വാക്കുകൾ · {text.split(/\s+/).filter(Boolean).length} ആകെ</div>
+              </Section>
+              <Section title="അരിപ്പ">
+                <label style={{display:"flex",alignItems:"flex-start",gap:8,fontSize:12,cursor:"pointer",marginBottom:10,lineHeight:1.6}}>
+                  <input type="checkbox" checked={filterStop} onChange={e=>setFilterStop(e.target.checked)} style={{accentColor:FT.teal,marginTop:4}}/>
+                  <span>
+                    <span style={{fontWeight:600}}>അർത്ഥരഹിത വാക്കുകൾ ഒഴിവാക്കുക</span><br/>
+                    <span style={{fontSize:10,color:FT.warmGrey}}>ആണ്, ഉണ്ട്, ഒരു, ഈ, the, and പോലുള്ള വാക്കുകൾ എല്ലാ ടെക്സ്റ്റിലും ആവർത്തിക്കും, പക്ഷേ അവയ്ക്ക് പ്രത്യേക അർത്ഥമില്ല. ഇത് ടിക്ക് ചെയ്താൽ അവ മേഘത്തിൽ വരില്ല.</span>
+                  </span>
+                </label>
+                <Slider label="ചുരുങ്ങിയ ആവർത്തനം" value={minFreq} onChange={setMinFreq} min={1} max={10} suffix="×"/>
+                <Slider label="പരമാവധി വാക്കുകൾ" value={maxWords} onChange={setMaxWords} min={10} max={300}/>
+              </Section>
+              <Section title="വാക്ക് പട്ടിക" defaultOpen={false}>
+                <div style={{maxHeight:220,overflow:"auto",fontSize:11}}>
+                  <table style={{width:"100%",borderCollapse:"collapse"}}>
+                    <thead><tr style={{color:FT.warmGrey,borderBottom:"1px solid "+FT.lightBorder}}>
+                      <th style={{textAlign:"left",padding:"4px 6px",fontWeight:600}}>വാക്ക്</th>
+                      <th style={{textAlign:"right",padding:"4px 6px",fontWeight:600}}>എണ്ണം</th>
+                      <th style={{padding:"4px 6px",width:80}}></th>
+                    </tr></thead>
+                    <tbody>{wordList.slice(0,30).map(([w,c],i)=>(
+                      <tr key={w} style={{borderBottom:"1px solid "+FT.lightBorder+"66"}}>
+                        <td style={{padding:"3px 6px",color:activePalette[i%activePalette.length],fontWeight:500}}>{w}</td>
+                        <td style={{padding:"3px 6px",textAlign:"right",color:FT.teal,fontFamily:"'Source Serif 4',Georgia,serif",fontWeight:600}}>{c}</td>
+                        <td style={{padding:"3px 6px"}}>
+                          <div style={{height:5,borderRadius:2,background:FT.sand,overflow:"hidden"}}>
+                            <div style={{height:"100%",width:(c/(wordList[0]?wordList[0][1]:1))*100+"%",background:activePalette[i%activePalette.length],borderRadius:2}}/>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}</tbody>
+                  </table>
+                </div>
+              </Section>
+            </>)}
+
+            {/* ---- LAYOUT ---- */}
+            {tab==="layout"&&(<>
+              <Section title="ക്യാൻവാസ്">
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:5}}>
+                  {[["800x600","4:3"],["1200x675","16:9"],["1080x1920","9:16"]].map(([v,l])=>(
+                    <button key={v} onClick={()=>setCanvasSize(v)} style={{
+                      padding:"8px 4px",borderRadius:3,cursor:"pointer",fontSize:11,fontWeight:600,textAlign:"center",fontFamily:"inherit",
+                      border:canvasSize===v?"1px solid "+FT.teal:"1px solid "+FT.lightBorder,
+                      background:canvasSize===v?FT.teal+"10":"#fff",
+                      color:canvasSize===v?FT.teal:FT.warmGrey
+                    }}>{l}<br/><span style={{fontSize:8,opacity:0.5}}>{v}</span></button>
+                  ))}
+                </div>
+              </Section>
+              <Section title="ആകൃതി">
+                <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
+                  {SHAPES.map((s,i)=><Chip key={s.value} label={s.name} icon={s.icon} active={shapeIdx===i} onClick={()=>setShapeIdx(i)}/>)}
+                </div>
+              </Section>
+              <Section title="ഭ്രമണം">
+                <div style={{display:"flex",flexWrap:"wrap",gap:5,marginBottom:10}}>
+                  {[["none","ഇല്ല"],["mixed","0°/90°"],["angled","നിശ്ചിത"],["random","ക്രമരഹിത"],["allAngles","എല്ലാം"]].map(([v,l])=>(
+                    <Chip key={v} label={l} active={rotationMode===v} onClick={()=>setRotationMode(v)}/>
+                  ))}
+                </div>
+                {(rotationMode==="angled"||rotationMode==="random")&&<Slider label="കോണളവ്" value={rotationAngle} onChange={setRotationAngle} min={0} max={180} suffix="°"/>}
+              </Section>
+              <Section title="സ്പേസിങ്">
+                <Slider label="വാക്ക് അകലം" value={spacing} onChange={setSpacing} min={0} max={30} suffix="px"/>
+                <Slider label="സ്പൈറൽ സാന്ദ്രത" value={spiralTightness} onChange={setSpiralTightness} min={1} max={10} step={0.5}/>
+              </Section>
+            </>)}
+
+            {/* ---- STYLE ---- */}
+            {tab==="style"&&(<>
+              <Section title="ഫോണ്ട്">
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:5,marginBottom:10}}>
+                  {FONTS.map((f,i)=>(
+                    <button key={i} onClick={()=>setFontIdx(i)} style={{
+                      padding:"8px",borderRadius:3,cursor:"pointer",textAlign:"left",
+                      border:fontIdx===i?"1px solid "+FT.teal:"1px solid "+FT.lightBorder,
+                      background:fontIdx===i?FT.teal+"10":"#fff",
+                      fontFamily:f.value,fontSize:13,color:fontIdx===i?FT.teal:FT.ink
+                    }}><div style={{fontSize:16,marginBottom:2}}>അആഇഈഉ</div><div style={{fontSize:9,opacity:0.45,fontFamily:"sans-serif"}}>{f.name}</div></button>
+                  ))}
+                </div>
+                <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:10}}>
+                  {[["400","Normal"],["700","Bold"],["900","Black"],["100","Thin"]].map(([w,l])=><Chip key={w} label={l} active={fontWeight===w} onClick={()=>setFontWeight(w)}/>)}
+                </div>
+                <Slider label="ചെറിയ വലിപ്പം" value={minSize} onChange={setMinSize} min={8} max={40} suffix="px"/>
+                <Slider label="വലിയ വലിപ്പം" value={maxSize} onChange={setMaxSize} min={30} max={200} suffix="px"/>
+                <Slider label="അതാര്യത" value={opacity} onChange={setOpacity} min={0.1} max={1} step={0.05}/>
+              </Section>
+              <Section title="നിറങ്ങൾ">
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:5,marginBottom:10}}>
+                  {PALETTES.map((p,i)=>(
+                    <button key={i} onClick={()=>{setPaletteIdx(i);setUseCustom(false);}} style={{
+                      padding:"6px 8px",borderRadius:3,cursor:"pointer",textAlign:"left",fontFamily:"inherit",
+                      border:!useCustom&&paletteIdx===i?"1px solid "+FT.teal:"1px solid "+FT.lightBorder,
+                      background:!useCustom&&paletteIdx===i?FT.teal+"08":"#fff"
+                    }}>
+                      <div style={{fontSize:9,color:FT.warmGrey,marginBottom:3,fontWeight:600}}>{p.name}</div>
+                      <div style={{display:"flex",gap:2}}>{p.colors.map((c,j)=><div key={j} style={{width:18,height:10,borderRadius:2,background:c}}/>)}</div>
+                    </button>
+                  ))}
+                </div>
+                <div style={{borderTop:"1px solid "+FT.lightBorder,paddingTop:10}}>
+                  <div style={{fontSize:10,color:FT.warmGrey,marginBottom:6,fontWeight:600}}>ഇഷ്ടാനുസൃത നിറങ്ങൾ</div>
+                  <div style={{display:"flex",flexWrap:"wrap",gap:4}}>
+                    {customColors.map((c,i)=>(
+                      <div key={i} style={{position:"relative"}}>
+                        <input type="color" value={c} onChange={e=>{const nc=customColors.slice();nc[i]=e.target.value;setCustomColors(nc);setUseCustom(true);}} style={{width:28,height:28,border:"1px solid "+FT.lightBorder,borderRadius:3,cursor:"pointer",padding:0,background:"none"}}/>
+                        <button onClick={()=>{setCustomColors(customColors.filter((_,j)=>j!==i));if(customColors.length<=1)setUseCustom(false);}} style={{position:"absolute",top:-4,right:-4,width:14,height:14,borderRadius:"50%",background:FT.ink,border:"none",color:"#fff",fontSize:8,cursor:"pointer",lineHeight:"1",padding:0}}>✕</button>
+                      </div>
+                    ))}
+                    <button onClick={()=>{setCustomColors(customColors.concat(["hsl("+Math.floor(Math.random()*360)+",50%,40%)"]));setUseCustom(true);}} style={{
+                      width:28,height:28,borderRadius:3,border:"1px dashed "+FT.border,
+                      background:"transparent",color:FT.teal,cursor:"pointer",fontSize:16,lineHeight:"1"
+                    }}>+</button>
+                  </div>
+                </div>
+              </Section>
+              <Section title="പശ്ചാത്തലം">
+                <div style={{display:"flex",gap:8,alignItems:"center",marginBottom:10}}>
+                  <label style={{fontSize:11,color:FT.warmGrey,fontWeight:600}}>നിറം</label>
+                  <input type="color" value={bgColor} onChange={e=>setBgColor(e.target.value)} style={{width:34,height:26,border:"1px solid "+FT.lightBorder,borderRadius:3,cursor:"pointer"}}/>
+                  <div style={{display:"flex",gap:3,flex:1,flexWrap:"wrap"}}>
+                    {["#FFFFFF","#FFF1E5","#F2DFCE","#262A33","#1A1A2E","#0D1B2A","#F5F0E8","#111111"].map(c=>(
+                      <button key={c} onClick={()=>setBgColor(c)} style={{
+                        width:22,height:22,borderRadius:3,
+                        border:bgColor===c?"2px solid "+FT.teal:"1px solid "+FT.lightBorder,
+                        background:c,cursor:"pointer",padding:0
+                      }}/>
+                    ))}
+                  </div>
+                </div>
+                <div style={{marginBottom:8}}>
+                  <div style={{fontSize:10,color:FT.warmGrey,marginBottom:4,fontWeight:600}}>ഗ്രേഡിയന്റ്</div>
+                  <div style={{display:"flex",gap:5}}>
+                    {[["none","ഇല്ല"],["linear","↗"],["radial","◎"],["vertical","↓"]].map(([v,l])=><Chip key={v} label={l} active={bgGradient===v} onClick={()=>setBgGradient(v)}/>)}
+                  </div>
+                </div>
+                {bgGradient!=="none"&&(
+                  <div style={{display:"flex",gap:8,alignItems:"center"}}>
+                    <label style={{fontSize:11,color:FT.warmGrey,fontWeight:600}}>രണ്ടാം നിറം</label>
+                    <input type="color" value={bgGradientColor2} onChange={e=>setBgGradientColor2(e.target.value)} style={{width:34,height:26,border:"1px solid "+FT.lightBorder,borderRadius:3,cursor:"pointer"}}/>
+                  </div>
+                )}
+              </Section>
+            </>)}
+
+            {/* ---- EXPORT ---- */}
+            {tab==="export"&&(<>
+              <Section title="ഡൗൺലോഡ്">
+                <div style={{padding:"10px 12px",background:FT.teal+"08",borderRadius:4,border:"1px solid "+FT.teal+"22",marginBottom:14,fontSize:11,color:FT.warmGrey,lineHeight:1.7}}>
+                  <span style={{color:FT.ink,fontWeight:600}}>പ്രിവ്യൂ ലൈവ് ആണ്</span> — നിങ്ങൾ ഇപ്പോൾ കാണുന്നത് തന്നെ ഡൗൺലോഡ് ചെയ്യും.
+                </div>
+                <div style={{display:"flex",flexDirection:"column",gap:8}}>
+                  <button onClick={downloadPNG} style={expBtn(FT.teal)}>
+                    <div style={{width:36,height:36,borderRadius:4,background:FT.teal+"15",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18}}>📷</div>
+                    <div><div style={{fontWeight:700,fontSize:13}}>PNG ഡൗൺലോഡ്</div><div style={{fontSize:10,color:FT.warmGrey,fontWeight:400}}>{cw} × {ch} · ഉയർന്ന നിലവാരം</div></div>
+                  </button>
+                  <button onClick={downloadSVG} style={expBtn(FT.oxford)}>
+                    <div style={{width:36,height:36,borderRadius:4,background:FT.oxford+"15",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18}}>🖼</div>
+                    <div><div style={{fontWeight:700,fontSize:13}}>SVG ഡൗൺലോഡ്</div><div style={{fontSize:10,color:FT.warmGrey,fontWeight:400}}>വെക്ടർ · പ്രിന്റിന് അനുയോജ്യം</div></div>
+                  </button>
+                </div>
+              </Section>
+              <Section title="സ്ഥിതിവിവരം">
+                <div style={{fontSize:12,color:FT.warmGrey,lineHeight:2.2}}>
+                  {[["വാക്കുകൾ",items.length],["ക്യാൻവാസ്",cw+"×"+ch],["ഫോണ്ട്",FONTS[fontIdx].name],["ആകൃതി",SHAPES[shapeIdx].name],["ഭ്രമണം",rotationMode],["പാലറ്റ്",useCustom?"ഇഷ്ടാനുസൃത":PALETTES[paletteIdx].name]].map(([k,v])=>(
+                    <div key={k} style={{display:"flex",justifyContent:"space-between",borderBottom:"1px dotted "+FT.lightBorder,paddingBottom:2}}>
+                      <span>{k}</span><span style={{color:FT.teal,fontWeight:600,fontFamily:"'Source Serif 4',Georgia,serif"}}>{v}</span>
+                    </div>
+                  ))}
+                </div>
+              </Section>
+              <Section title="സഹായം" defaultOpen={false}>
+                <div style={{fontSize:11,color:FT.warmGrey,lineHeight:2}}>
+                  <p style={{margin:"0 0 4px"}}>• മാറ്റങ്ങൾ തത്സമയം പ്രിവ്യൂവിൽ കാണാം</p>
+                  <p style={{margin:"0 0 4px"}}>• വാക്കുകളിൽ മൗസ് ചലിപ്പിച്ചാൽ വിശദാംശങ്ങൾ</p>
+                  <p style={{margin:"0 0 4px"}}>• ⛶ ഫുൾസ്ക്രീൻ · ⊞ ഗ്രിഡ് · +/− സൂം</p>
+                  <p style={{margin:"0 0 4px"}}>• "പുതിയ ഡിസൈൻ" → വ്യത്യസ്ത ക്രമീകരണം</p>
+                </div>
+              </Section>
+            </>)}
+          </div>
+        </div>
+
+        {/* ===== PREVIEW ===== */}
+        <div ref={previewContainerRef} style={{
+          flex:1,display:"flex",flexDirection:"column",overflow:"hidden",
+          background:fullscreen?"#f5f5f5":FT.cream,
+          position:fullscreen?"fixed":"relative",inset:fullscreen?0:undefined,zIndex:fullscreen?9999:1
+        }}>
+          {/* Toolbar */}
+          <div style={{
+            display:"flex",alignItems:"center",gap:8,padding:"7px 16px",flexShrink:0,
+            background:FT.paper,borderBottom:"1px solid "+FT.lightBorder
+          }}>
+            <span style={{fontSize:10,color:FT.warmGrey,fontWeight:700,letterSpacing:"0.1em",fontFamily:"'Source Serif 4',Georgia,serif"}}>PREVIEW</span>
+            <div style={{width:1,height:16,background:FT.lightBorder,margin:"0 4px"}}/>
+            <button onClick={()=>setZoom(z=>Math.max(0.1,z-0.1))} style={tbBtn}>−</button>
+            <span style={{fontSize:11,color:FT.teal,fontWeight:700,minWidth:42,textAlign:"center",fontFamily:"'Source Serif 4',Georgia,serif"}}>{Math.round(zoom*100)}%</span>
+            <button onClick={()=>setZoom(z=>Math.min(3,z+0.1))} style={tbBtn}>+</button>
+            <button onClick={fitZoom} style={Object.assign({},tbBtn,{fontSize:10,width:"auto",padding:"3px 10px"})}>Fit</button>
+            <button onClick={()=>setZoom(1)} style={Object.assign({},tbBtn,{fontSize:10,width:"auto",padding:"3px 10px"})}>1:1</button>
+            <div style={{width:1,height:16,background:FT.lightBorder,margin:"0 4px"}}/>
+            <button onClick={()=>setShowGrid(g=>!g)} style={Object.assign({},tbBtn,{color:showGrid?FT.teal:FT.warmGrey,borderColor:showGrid?FT.teal:undefined})} title="Grid">⊞</button>
+            <button onClick={()=>setFullscreen(f=>!f)} style={tbBtn} title="Fullscreen">{fullscreen?"⊗":"⛶"}</button>
+            <div style={{flex:1}}/>
+            {generating
+              ?<span style={{fontSize:11,color:FT.crimson,fontWeight:600,animation:"ftPulse 0.8s ease-in-out infinite",fontFamily:"'Source Serif 4',Georgia,serif"}}>● സൃഷ്ടിക്കുന്നു…</span>
+              :<span style={{fontSize:11,color:FT.teal,fontFamily:"'Source Serif 4',Georgia,serif"}}>● {items.length} words</span>}
+            <div style={{width:1,height:16,background:FT.lightBorder}}/>
+            <span style={{fontSize:10,color:FT.warmGrey,fontFamily:"'Source Serif 4',Georgia,serif"}}>{cw}×{ch}</span>
+          </div>
+
+          {/* Canvas area */}
+          <div style={{flex:1,overflow:"auto",display:"flex",alignItems:"center",justifyContent:"center",padding:24,position:"relative"}}>
+            <div style={{position:"relative",lineHeight:0}}>
+              <div style={{boxShadow:"0 1px 4px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.06)",borderRadius:2,overflow:"hidden",border:"1px solid "+FT.lightBorder,lineHeight:0}}>
+                {previewSVG}
+              </div>
+              {tip&&(
+                <div style={{
+                  position:"fixed",top:64,left:"50%",transform:"translateX(-50%)",
+                  background:"#fff",border:"1px solid "+FT.lightBorder,borderRadius:4,
+                  padding:"8px 16px",pointerEvents:"none",whiteSpace:"nowrap",zIndex:100,
+                  display:"flex",alignItems:"center",gap:14,
+                  boxShadow:"0 4px 16px rgba(0,0,0,0.1)"
+                }}>
+                  <span style={{fontSize:20,fontWeight:700,color:tip.color,fontFamily:FONTS[fontIdx].value}}>{tip.word}</span>
+                  <div style={{width:1,height:28,background:FT.lightBorder}}/>
+                  <div style={{fontSize:10,color:FT.warmGrey,lineHeight:1.7,fontFamily:"'Source Serif 4',Georgia,serif"}}>
+                    <div>Size: <span style={{color:FT.teal,fontWeight:600}}>{tip.fontSize.toFixed(0)}px</span></div>
+                    <div>Freq: <span style={{color:FT.teal,fontWeight:600}}>{tip.freq}</span> · Rot: <span style={{color:FT.teal,fontWeight:600}}>{tip.rotation.toFixed(0)}°</span></div>
+                  </div>
+                  <div style={{width:16,height:16,borderRadius:2,background:tip.color,border:"1px solid "+FT.lightBorder}}/>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {fullscreen&&(
+            <button onClick={()=>setFullscreen(false)} style={{
+              position:"absolute",top:56,right:20,background:"#fff",border:"1px solid "+FT.lightBorder,
+              color:FT.ink,borderRadius:4,width:32,height:32,cursor:"pointer",fontSize:14,zIndex:10000,
+              boxShadow:"0 2px 8px rgba(0,0,0,0.1)"
+            }}>✕</button>
+          )}
+        </div>
+      </div>
+
+      <canvas ref={hiddenCanvasRef} style={{display:"none"}}/>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
